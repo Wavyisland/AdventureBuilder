@@ -669,6 +669,17 @@
             color: #ffffff;
         }
 
+        /* Items - Dark Gold background, no outline, Black text */
+        .card.items {
+            background: #b8860b;
+            border: none;
+        }
+
+        .card.items .card-category,
+        .card.items .card-value {
+            color: #000000;
+        }
+
         .card.new-card {
             animation: cardPopIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
@@ -854,6 +865,7 @@
                     <button class="type-btn" onclick="drawSpecificCard('feature')">Feature</button>
                     <button class="type-btn" onclick="drawSpecificCard('action')">Action</button>
                     <button class="type-btn" onclick="drawSpecificCard('magic')">Magic</button>
+                    <button class="type-btn" onclick="drawSpecificCard('items')">Items</button>
                 </div>
             </div>
             <div class="left-controls">
@@ -1100,6 +1112,29 @@
             "Star", "Sun", "Throne", "Oath", "Zenith", "Comet", "Pillar", "Nebula", "Ethereal", "Covenant"
         ];
 
+        const itemsCards = [
+            "Longsword", "Gauntlet", "Quarterstaff", "Hook", "Hunting Knife", "Estoc", "Nunchaku", "Ring", "Shortsword", "Halberd",
+            "Trident", "Machete", "Claymore", "Vest", "Chef's Knife", "Pendant", "Lance", "Kunai", "Scythe", "Large Crossbow",
+            "Katana", "Coat", "Blowgun", "Longbow", "Pickaxe", "Flail", "Javelin", "Boots", "Club", "Battle Axe",
+            "Caltrops", "Brass Knuckles", "Zweihander", "Scimitar", "Whip", "Amulet", "Spear", "Scarf", "Small Crossbow", "Boomerang",
+            "Heavy Armor", "Helm", "Bolas", "Gloves", "Sling", "Tuning Fork", "Mug", "Mallet", "Two-Pronged Fork", "Morning Star",
+            "Alchemist's Kit", "Sickle", "Dagger", "Mask", "Spiked Shield", "Rope", "Mace", "Map", "Traveler's Cloak", "Harp",
+            "Shield", "Rapier", "Hourglass", "Hatchet", "Double-Headed Axe", "Bone", "Goblet", "Light Armor", "Telescope", "Darts",
+            "Whetstone", "Carpenter's Tools", "Lantern", "Paintbrush", "Medium Armor", "Mirror", "Antler", "Quiver", "Quill", "Scroll Case",
+            "Satchel", "Censer", "Straight Razor", "Cape", "Spyglass", "Bomb", "Fishing Rod", "Wind Chimes", "Spool of Thread", "Pipe",
+            "Grappling Hook", "Battle Standard", "Alchemist's Fire", "War Drum", "Bell", "War Fan", "Candle", "Flint and Steel", "Pouch of Coins", "Walking Stick",
+            "Chain Whip", "Hand Mirror", "Training Sword", "Ball", "Dice", "Gem", "Spiked Gauntlet", "Glass Eye", "Prybar", "Pen",
+            "Painting", "Shovel", "Banner", "Wand", "Throwing Net", "Medicine Pouch", "Ladder", "Talisman", "Torch", "War Horn",
+            "Apron", "Siege Hammer", "Harpoon", "Bowstring", "Leather Belt", "Lockbox", "Cooking Pot", "Gold Ring", "Iron Spear", "Belt",
+            "Spade", "Chair", "Water Skin", "Ball", "Flask", "Tablet", "Key", "Crown", "Sword", "Gloves",
+            "Boots", "Wooden Shield", "Stone", "Cards", "Mask", "Bracers", "Silver Bell", "Shepherd's Crook", "Leather Wraps", "Tools",
+            "Horn", "Goblet", "Staff", "Disc", "Mortar and Pestle", "Scroll", "Leather Pouch", "Cloak", "Helm", "Bow",
+            "Flute", "Pipe", "Locket", "Quiver", "Pouch", "Throwing Axe", "Net", "Holy Symbol", "Scepter", "Chain",
+            "Compass", "Vase", "Necklace", "Pick", "Tome", "Smithing Gloves", "Bracelet", "Spike", "Map", "Scale",
+            "Tent", "Quilt", "Walking Cane", "Pole", "Fur Mantle", "Clay Pot", "Scabbard", "Millstone", "Hand Saw", "Wooden Beam",
+            "Fishing Line", "Oil Can", "Barrel", "Crate", "Chisel", "Feather Duster", "Wheel", "Measuring Stick", "Pitchfork", "Broom"
+        ];
+
         // Initialize
         function initDeck() {
             deck = [];
@@ -1113,6 +1148,7 @@
             featuresFlat.forEach(f => deck.push({ category: 'feature', value: f }));
             actionsFlat.forEach(a => deck.push({ category: 'action', value: a }));
             magicCards.forEach(m => deck.push({ category: 'magic', value: m }));
+            itemsCards.forEach(i => deck.push({ category: 'items', value: i }));
             
             // Shuffle
             shuffleDeck();
