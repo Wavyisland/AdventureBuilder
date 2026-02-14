@@ -279,6 +279,141 @@
             text-align: center;
         }
 
+        /* Help Button */
+        .help-button {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 2px solid #3a3a3a;
+            border-radius: 50%;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+
+        .help-button:hover {
+            background: #ff3333;
+            border-color: #ff3333;
+            transform: scale(1.1);
+        }
+
+        /* Help Modal */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .help-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .help-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            background: #1a1a1a;
+            border: 3px solid #ff3333;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .help-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .help-title {
+            font-family: 'Bowlby One', sans-serif;
+            font-size: 1.5em;
+            color: #ff3333;
+            letter-spacing: 2px;
+        }
+
+        .close-help {
+            width: 32px;
+            height: 32px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .close-help:hover {
+            background: #ff3333;
+        }
+
+        .help-content {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section-title {
+            font-size: 1em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ff3333;
+            margin-bottom: 10px;
+        }
+
+        .help-section-content {
+            font-size: 0.9em;
+            color: #b0b0b0;
+            margin-left: 15px;
+        }
+
+        .help-section-content strong {
+            color: #e0e0e0;
+        }
+
         .deck-count-badge {
             display: inline-block;
             background: #2a2a2a;
@@ -523,6 +658,17 @@
             color: #ffffff;
         }
 
+        /* Magic - Dark Blue-Grey background, no outline, White text */
+        .card.magic {
+            background: #3d4f5c;
+            border: none;
+        }
+
+        .card.magic .card-category,
+        .card.magic .card-value {
+            color: #ffffff;
+        }
+
         .card.new-card {
             animation: cardPopIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
@@ -616,6 +762,52 @@
     </style>
 </head>
 <body>
+    <!-- Help Button -->
+    <button class="help-button" onclick="openHelp()" title="Help">?</button>
+
+    <!-- Help Overlay & Modal -->
+    <div class="help-overlay" id="helpOverlay" onclick="closeHelp()"></div>
+    <div class="help-modal" id="helpModal">
+        <div class="help-header">
+            <div class="help-title">HOW TO USE</div>
+            <button class="close-help" onclick="closeHelp()">×</button>
+        </div>
+        <div class="help-content">
+            <div class="help-section">
+                <div class="help-section-title">Drawing Cards</div>
+                <div class="help-section-content">
+                    <strong>DRAW</strong> - Draw a random card from the deck<br>
+                    <strong>▼ Arrow</strong> - Click to reveal card type buttons<br>
+                    <strong>Type Buttons</strong> - Draw a specific type of card (Descriptor, Location, Theme, etc.)
+                </div>
+            </div>
+
+            <div class="help-section">
+                <div class="help-section-title">Managing Cards</div>
+                <div class="help-section-content">
+                    <strong>Drag Cards</strong> - Click and drag any card to move it around the table. Cards snap to an invisible grid when dropped<br>
+                    <strong>× Button</strong> - Hover over a card to see the remove button. Click to send card to discard pile
+                </div>
+            </div>
+
+            <div class="help-section">
+                <div class="help-section-title">Table Controls</div>
+                <div class="help-section-content">
+                    <strong>DISCARD</strong> - View all discarded cards. Click any card in the discard pile to return it to the table<br>
+                    <strong>RESHUFFLE</strong> - Return all cards from the table and discard pile back to the deck and shuffle<br>
+                    <strong>CLEAR</strong> - Send all cards from the table to the discard pile
+                </div>
+            </div>
+
+            <div class="help-section">
+                <div class="help-section-title">Adventure Inspiration</div>
+                <div class="help-section-content">
+                    <strong>Dice Icon (⚅)</strong> - Click to generate a new random adventure quest hook
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Discard Pile Overlay & Modal -->
     <div class="discard-overlay" id="discardOverlay" onclick="closeDiscardPile()"></div>
     <div class="discard-modal" id="discardModal">
@@ -661,6 +853,7 @@
                     <button class="type-btn" onclick="drawSpecificCard('form')">Form</button>
                     <button class="type-btn" onclick="drawSpecificCard('feature')">Feature</button>
                     <button class="type-btn" onclick="drawSpecificCard('action')">Action</button>
+                    <button class="type-btn" onclick="drawSpecificCard('magic')">Magic</button>
                 </div>
             </div>
             <div class="left-controls">
@@ -851,6 +1044,29 @@
             "Thrust", "Exhale", "Emit", "Vaporize", "Sing", "Cling", "Coil", "Anchor", "Flame", "Repel"
         ];
 
+        const magicWords = [
+            "Acid", "Air", "Ash", "Earth", "Fire", "Ice", "Lightning", "Magma", "Smoke", "Snow",
+            "Storm", "Stone", "Thunder", "Water", "Wind", "Gravity", "Void", "Glow", "Dark", "Pressure",
+            "Fissure", "Ember", "Torrent", "Aurora", "Fuel", "Balance", "Blood", "Bone", "Death", "Despair",
+            "Flesh", "Grave", "Life", "Plague", "Rebirth", "Shadow", "Heat", "Spirit", "Decay", "Hunger",
+            "Terror", "Undeath", "Dust", "Echo", "Lament", "Wane", "Husk", "Afterlife", "Sepulcher", "Mortal",
+            "Arcane", "Chaos", "Divine", "Eldritch", "Illusion", "Hex", "Mystery", "Omen", "Prophecy", "Ritual",
+            "Rune", "Sigil", "Encode", "Spell", "Curse", "Ward", "Reflecting", "Glamour", "Conjure", "Enigma",
+            "Paralyzing", "Phantom", "Charm", "Mental", "Portal", "Beast", "Bark", "Bloom", "Tide", "Claw",
+            "Fang", "Feather", "Hive", "Leaf", "Nest", "Pelt", "Root", "Seed", "Spore", "Talon",
+            "Thorn", "Vine", "Wild", "Horn", "Meadow", "Briar", "Creek", "Glade", "Pine", "Burrow",
+            "Anguish", "Bliss", "Calm", "Despair", "Dread", "Envy", "Frenzy", "Grief", "Hope", "Joy",
+            "Lies", "Lust", "Melancholy", "Rage", "Regret", "Serenity", "Blinding", "Spite", "Sorrow", "Zeal",
+            "Awe", "Yearning", "Gloom", "Fuse", "Desolation", "Charge", "Current", "Drive", "Impact", "Gravity",
+            "Impulse", "Kinetic", "Luck", "Magnetism", "Momentum", "Pulse", "Radiance", "Shock", "Spark", "Surge",
+            "Tide", "Vigor", "Voltage", "Wave", "Burst", "Catalyst", "Bolt", "Resonance", "Beacon", "Fusion",
+            "Birth", "Craft", "Dream", "Forge", "Invention", "Knowledge", "Light", "Lore", "Spark", "Weave",
+            "Ash", "Collapse", "Corruption", "Crush", "Crumble", "Doom", "Scorch", "Ruin", "Blight", "Shatter",
+            "Anvil", "Kindle", "Fracture", "Dismantle", "Engulf", "Ascend", "Celestial", "Chalice", "Divine", "Eclipse",
+            "Halo", "Heaven", "Holy", "Infinity", "Justice", "Moon", "Oracle", "Glitter", "Revelation", "Sanctum",
+            "Star", "Sun", "Throne", "Oath", "Zenith", "Comet", "Pillar", "Nebula", "Ethereal", "Covenant"
+        ];
+
         // State
         let deck = [];
         let table = [];
@@ -860,6 +1076,29 @@
         // Magnetic grid settings
         const GRID_SIZE_X = 300; // Horizontal snap distance
         const GRID_SIZE_Y = 180; // Vertical snap distance (reduced to match card height)
+
+        const magicCards = [
+            "Acid", "Air", "Ash", "Earth", "Fire", "Ice", "Lightning", "Magma", "Smoke", "Snow",
+            "Storm", "Stone", "Thunder", "Water", "Wind", "Gravity", "Void", "Glow", "Dark", "Pressure",
+            "Fissure", "Ember", "Torrent", "Aurora", "Fuel", "Balance", "Blood", "Bone", "Death", "Despair",
+            "Flesh", "Grave", "Life", "Plague", "Rebirth", "Shadow", "Heat", "Spirit", "Decay", "Hunger",
+            "Terror", "Undeath", "Dust", "Echo", "Lament", "Wane", "Husk", "Afterlife", "Sepulcher", "Mortal",
+            "Arcane", "Chaos", "Divine", "Eldritch", "Illusion", "Hex", "Mystery", "Omen", "Prophecy", "Ritual",
+            "Rune", "Sigil", "Encode", "Spell", "Curse", "Ward", "Reflecting", "Glamour", "Conjure", "Enigma",
+            "Paralyzing", "Phantom", "Charm", "Mental", "Portal", "Beast", "Bark", "Bloom", "Tide", "Claw",
+            "Fang", "Feather", "Hive", "Leaf", "Nest", "Pelt", "Root", "Seed", "Spore", "Talon",
+            "Thorn", "Vine", "Wild", "Horn", "Meadow", "Briar", "Creek", "Glade", "Pine", "Burrow",
+            "Anguish", "Bliss", "Calm", "Despair", "Dread", "Envy", "Frenzy", "Grief", "Hope", "Joy",
+            "Lies", "Lust", "Melancholy", "Rage", "Regret", "Serenity", "Blinding", "Spite", "Sorrow", "Zeal",
+            "Awe", "Yearning", "Gloom", "Fuse", "Desolation", "Charge", "Current", "Drive", "Impact", "Gravity",
+            "Impulse", "Kinetic", "Luck", "Magnetism", "Momentum", "Pulse", "Radiance", "Shock", "Spark", "Surge",
+            "Tide", "Vigor", "Voltage", "Wave", "Burst", "Catalyst", "Bolt", "Resonance", "Beacon", "Fusion",
+            "Birth", "Craft", "Dream", "Forge", "Invention", "Knowledge", "Light", "Lore", "Spark", "Weave",
+            "Ash", "Collapse", "Corruption", "Crush", "Crumble", "Doom", "Scorch", "Ruin", "Blight", "Shatter",
+            "Anvil", "Kindle", "Fracture", "Dismantle", "Engulf", "Ascend", "Celestial", "Chalice", "Divine", "Eclipse",
+            "Halo", "Heaven", "Holy", "Infinity", "Justice", "Moon", "Oracle", "Glitter", "Revelation", "Sanctum",
+            "Star", "Sun", "Throne", "Oath", "Zenith", "Comet", "Pillar", "Nebula", "Ethereal", "Covenant"
+        ];
 
         // Initialize
         function initDeck() {
@@ -873,6 +1112,7 @@
             formsFlat.forEach(f => deck.push({ category: 'form', value: f }));
             featuresFlat.forEach(f => deck.push({ category: 'feature', value: f }));
             actionsFlat.forEach(a => deck.push({ category: 'action', value: a }));
+            magicCards.forEach(m => deck.push({ category: 'magic', value: m }));
             
             // Shuffle
             shuffleDeck();
@@ -1242,6 +1482,16 @@
 
         function updateDeckCount() {
             // No longer displaying count
+        }
+
+        function openHelp() {
+            document.getElementById('helpModal').classList.add('active');
+            document.getElementById('helpOverlay').classList.add('active');
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').classList.remove('active');
+            document.getElementById('helpOverlay').classList.remove('active');
         }
 
         function toggleTypeSelector() {
