@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADVENTURE BUILDER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Lexend:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: #000000;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 0;
+            position: relative;
+        }
+
+        /* Adventure Inspiration - now inside table */
+        .adventure-inspiration {
+            padding: 0 0 30px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .adventure-content {
+            flex: 1;
+        }
+
+        .adventure-label {
+            font-size: 0.9em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff3333;
+            margin-bottom: 8px;
+        }
+
+        .adventure-text {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #e0e0e0;
+            line-height: 1.3;
+        }
+
+        .roll-icon {
+            padding: 12px;
+            font-size: 1.8em;
+            line-height: 1;
+            border: none;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .roll-icon:hover {
+            background: #ff3333;
+            transform: scale(1.1);
+        }
+
+        .roll-icon:active {
+            transform: scale(1) rotate(180deg);
+        }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 15px 30px;
+            border-top: 2px solid #2a2a2a;
+            position: relative;
+            z-index: 999;
+        }
+
+        .left-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-toggle {
+            padding: 12px 14px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            line-height: 1;
+        }
+
+        .filter-toggle:hover {
+            color: #ff3333;
+            transform: scale(1.2);
+        }
+
+        .filter-toggle.active {
+            color: #ff3333;
+        }
+
+        .filter-toggle .arrow {
+            display: inline-block;
+            transition: transform 0.3s;
+        }
+
+        .filter-toggle.active .arrow {
+            transform: rotate(-90deg);
+        }
+
+        /* Type Selector Slide-out */
+        .type-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            max-width: 0;
+            overflow: hidden;
+            transition: max-width 0.3s ease;
+        }
+
+        .type-selector.open {
+            max-width: 800px;
+        }
+
+        /* Discard Pile Modal */
+        .discard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .discard-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .discard-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            background: #1a1a1a;
+            border: 3px solid #ff3333;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .discard-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .discard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .discard-title {
+            font-family: 'Bowlby One', sans-serif;
+            font-size: 1.2em;
+            color: #ff3333;
+            letter-spacing: 2px;
+        }
+
+        .close-discard {
+            width: 32px;
+            height: 32px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .close-discard:hover {
+            background: #ff3333;
+        }
+
+        .discard-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .discard-card {
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .discard-card:hover {
+            border-color: #ff3333;
+            background: #2d2d2d;
+            transform: translateY(-3px);
+        }
+
+        .discard-card-category {
+            font-size: 0.6em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff3333;
+            margin-bottom: 8px;
+        }
+
+        .discard-card-value {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #e0e0e0;
+            line-height: 1.3;
+        }
+
+        .discard-empty {
+            text-align: center;
+            padding: 3rem;
+            color: #555;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .discard-count-badge {
+            display: inline-block;
+            background: #ff3333;
+            color: #ffffff;
+            font-size: 0.7em;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .deck-count-badge {
+            display: inline-block;
+            background: #2a2a2a;
+            color: #ffffff;
+            font-size: 0.7em;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .type-btn {
+            padding: 8px 12px;
+            font-size: 0.65em;
+            font-weight: bold;
+            border: 2px solid #2a2a2a;
+            background: #2a2a2a;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .type-btn:hover {
+            background: #ff3333;
+            border-color: #ff3333;
+            color: #e0e0e0;
+        }
+
+        .type-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            border: none;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-draw {
+            background: #ff3333;
+            font-weight: 900;
+            font-size: 0.9em;
+            padding: 12px 24px;
+        }
+
+        .btn:hover {
+            background: #ff3333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 51, 51, 0.3);
+        }
+
+        .btn-draw:hover {
+            background: #ff5555;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Table Area */
+        .table-area {
+            flex: 1;
+            background: #000000;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.03) 2px,
+                    rgba(255, 255, 255, 0.03) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.03) 2px,
+                    rgba(255, 255, 255, 0.03) 4px
+                ),
+                radial-gradient(
+                    circle at 20% 30%, 
+                    rgba(255, 51, 51, 0.02) 0%, 
+                    transparent 50%
+                ),
+                radial-gradient(
+                    circle at 80% 70%, 
+                    rgba(255, 51, 51, 0.02) 0%, 
+                    transparent 50%
+                );
+            padding: 30px;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .table-content {
+            position: relative;
+            flex: 1;
+            min-height: 500px;
+        }
+
+        .table-empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 1.5em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .table-empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #333;
+            font-size: 1.5em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        /* Card Styles */
+        .card {
+            width: 280px;
+            height: 160px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            border: none;
+            cursor: grab;
+            transition: box-shadow 0.2s;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .card.dragging {
+            cursor: grabbing;
+            z-index: 1000;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        /* Theme - Charcoal background, no outline, White text */
+        .card.theme {
+            background: #2a2a2a;
+            border: none;
+        }
+
+        .card.theme .card-category,
+        .card.theme .card-value {
+            color: #ffffff;
+        }
+
+        /* Descriptor - White background, no outline, Charcoal text */
+        .card.descriptor {
+            background: #ffffff;
+            border: none;
+        }
+
+        .card.descriptor .card-category,
+        .card.descriptor .card-value {
+            color: #2a2a2a;
+        }
+
+        /* Location - Light Grey background, no outline, Charcoal text */
+        .card.location {
+            background: #d0d0d0;
+            border: none;
+        }
+
+        .card.location .card-category,
+        .card.location .card-value {
+            color: #2a2a2a;
+        }
+
+        /* Obstacle - Dark Grey background, no outline, White text */
+        .card.obstacle {
+            background: #4a4a4a;
+            border: none;
+        }
+
+        .card.obstacle .card-category,
+        .card.obstacle .card-value {
+            color: #ffffff;
+        }
+
+        /* Form - Red background, no outline, Black text */
+        .card.form {
+            background: #ff3333;
+            border: none;
+        }
+
+        .card.form .card-category,
+        .card.form .card-value {
+            color: #000000;
+        }
+
+        /* Feature - Dark Red background, no outline, Black text */
+        .card.feature {
+            background: #cc0000;
+            border: none;
+        }
+
+        .card.feature .card-category,
+        .card.feature .card-value {
+            color: #000000;
+        }
+
+        /* Action - Darker Red background, no outline, White text */
+        .card.action {
+            background: #990000;
+            border: none;
+        }
+
+        .card.action .card-category,
+        .card.action .card-value {
+            color: #ffffff;
+        }
+
+        .card.new-card {
+            animation: cardPopIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes cardPopIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-category {
+            font-size: 0.65em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .card-remove {
+            width: 20px;
+            height: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: bold;
+            line-height: 1;
+            opacity: 0;
+        }
+
+        .card:hover .card-remove {
+            opacity: 1;
+        }
+
+        .card-remove:hover {
+            background: #ff3333;
+            transform: scale(1.1);
+        }
+
+        .card-value {
+            font-size: 1em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .left-controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .card {
+                width: 100%;
+            }
+
+            .type-selector.open {
+                max-width: none;
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .adventure-text {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Discard Pile Overlay & Modal -->
+    <div class="discard-overlay" id="discardOverlay" onclick="closeDiscardPile()"></div>
+    <div class="discard-modal" id="discardModal">
+        <div class="discard-header">
+            <div class="discard-title">DISCARD PILE</div>
+            <button class="close-discard" onclick="closeDiscardPile()">×</button>
+        </div>
+        <div class="discard-cards-grid" id="discardCards">
+            <div class="discard-empty">No cards in discard pile</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Table Area -->
+        <div class="table-area">
+            <!-- Adventure Inspiration -->
+            <div class="adventure-inspiration">
+                <div class="adventure-content">
+                    <div class="adventure-label">ADVENTURE INSPIRATION</div>
+                    <div class="adventure-text" id="adventureText"></div>
+                </div>
+                <button class="roll-icon" onclick="rollAdventure()">⚅</button>
+            </div>
+
+            <!-- Table Content -->
+            <div class="table-content" id="tableContent">
+                <div class="table-empty">DRAW CARDS TO BUILD YOUR ADVENTURE</div>
+            </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="bottom-controls">
+            <div class="left-controls">
+                <button class="btn btn-draw" onclick="drawCard()">DRAW</button>
+                <button class="filter-toggle" id="filterToggleBtn" onclick="toggleTypeSelector()">
+                    <span class="arrow">▼</span>
+                </button>
+                <div class="type-selector" id="typeSelector">
+                    <button class="type-btn" onclick="drawSpecificCard('descriptor')">Descriptor</button>
+                    <button class="type-btn" onclick="drawSpecificCard('location')">Location</button>
+                    <button class="type-btn" onclick="drawSpecificCard('theme')">Theme</button>
+                    <button class="type-btn" onclick="drawSpecificCard('obstacle')">Obstacle</button>
+                    <button class="type-btn" onclick="drawSpecificCard('form')">Form</button>
+                    <button class="type-btn" onclick="drawSpecificCard('feature')">Feature</button>
+                    <button class="type-btn" onclick="drawSpecificCard('action')">Action</button>
+                </div>
+            </div>
+            <div class="left-controls">
+                <button class="btn" id="discardBtn" onclick="openDiscardPile()">DISCARD <span class="discard-count-badge" id="discardCount">0</span></button>
+                <button class="btn" onclick="reshuffleAll()">RESHUFFLE</button>
+                <button class="btn" onclick="clearTable()">CLEAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data from PDF
+        const adventures = [
+            "Seek safety from an overwhelming threat",
+            "Chase and stop an enemy before they reach a destination",
+            "Enter a dangerous place and retrieve an item or NPC(s)",
+            "Clear an area of all threats",
+            "Solve a mystery by collecting clues",
+            "Escort an NPC(s) or item through dangerous territory",
+            "Race against another party to retrieve an item or NPC(s)",
+            "Defend an area from an incoming attack",
+            "Escape captivity or dangerous place",
+            "Stop a threat before it becomes unstoppable",
+            "Close a spawn point",
+            "Hunt an elusive and dangerous monster",
+            "Win a contest, tournament, or sport to gain a great prize",
+            "Stop a hijacked vehicle",
+            "Barter peace between two opposing factions",
+            "Gain the support of a reluctant ally against a grave threat",
+            "Assassinate a faction leader",
+            "End a tyrannical rein",
+            "Explored an undocumented location",
+            "Survive a deadly environment"
+        ];
+
+        const descriptors = [
+            "Whispering", "Dreaming", "Obsidian", "Emerald", "Ruby", "Sapphire", "Amethyst", "Golden", "Silver", "Iron",
+            "Crystal", "Shadowy", "Sunken", "Soaring", "Burning", "Weeping", "Laughing", "Singing", "Dancing", "Mirrored",
+            "Haunted", "Forgotten", "Hidden", "Enchanted", "Glittering", "Broken", "Wailing", "Howling", "Screaming", "Murmuring",
+            "Sleeping", "Waking", "Dying", "Ancient", "Ethereal", "Pearlescent", "Radiant", "Brilliant", "Luminous", "Coral",
+            "Onyx", "Ivory", "Bone", "Bloody", "Moonlit", "Sunlit", "Starlit", "Misty", "Murky", "Rain-soaked",
+            "Snowbound", "Fiery", "Earthen", "Windblown", "Floral", "Fungal", "Verdant", "Twilight", "Midnight", "Phosphorescent",
+            "Iridescent", "Holographic", "Prismatic", "Metallic", "Magnetic", "Radioactive", "Smoky", "Steamy", "Watery", "Deep",
+            "Shallow", "Brackish", "Saline", "Dusty", "Rocky", "Marshy", "Overgrown", "Barren", "Lush", "Arid",
+            "Tropical", "Subterranean", "Extraterrestrial", "Celestial", "Infernal", "Heavenly", "Fractured", "Petrified", "Vibrant", "Looming",
+            "Gnarled", "Serene", "Torrential", "Stark", "Veiled", "Shattered", "Hushed", "Boundless", "Chaotic", "Resplendent"
+        ];
+
+        const locations = [
+            "Rift", "Spire", "Keep", "Citadel", "Dungeon", "Labyrinth", "Grotto", "Cavern", "Abyss", "Chasm",
+            "Plateau", "Mesa", "Dune", "Glacier", "Observatory", "Waterfall", "Spring", "Moor", "Tundra", "Jungle",
+            "Library", "Orchard", "Vineyard", "Obelisk", "Pyramid", "Barrow", "Catacombs", "Menhir", "Warehouse", "Dolmen",
+            "Treehouse", "Lighthouse", "Temple", "Statue", "Bridge", "Road", "Path", "Tunnels", "Gate", "Portal",
+            "Border", "Wall", "Moat", "Hedge", "Reef", "Volcano", "Crater", "Graveyard", "Battlefield", "Manor",
+            "Moon", "Workshop", "Chapel", "Vale", "Swamp", "Forest", "Clock Tower", "Peak", "Field", "Ruins",
+            "Cliffs", "Meadow", "Grove", "Grassland", "Woods", "Thicket", "Ridge", "Canyon", "Cave", "Factory",
+            "Forge", "Wasteland", "Rocks", "Basin", "Lagoon", "Trench", "Pool", "Estuary", "Barracks", "Plain",
+            "Cliff", "Wetland", "Ruins", "Badlands", "Oasis", "Desert", "Rainforest", "City District", "Asteroid", "Observatory",
+            "Pit", "Sanctuary", "Tower", "Archway", "Lagoon", "Rapids", "Highlands", "Courtyard", "Monolith", "Fortress"
+        ];
+
+        const themesFlat = [
+            "Blood", "Thorn", "Shadows", "Ember", "Ice", "Tapestry", "Flame", "Rupture", "Bone", "Mycelium",
+            "Light", "Husk", "Storm", "Obelisk", "Decay", "Murmur", "Crystal", "Sentinel", "Gears", "Vault",
+            "Poison", "Veil", "Ash", "Shroud", "Web", "Tendril", "Rot", "Miasma", "Fog", "Wisp",
+            "Void", "Abyssal", "Echo", "Spire", "Iron", "Carapace", "Gold", "Phalanx", "Glass", "Seer",
+            "Root", "Bastion", "Fungi", "Labyrinth", "Sand", "Scorch", "Vine", "Zenith", "Ruin", "Summit",
+            "Time", "Cascade", "Smoke", "Eclipse", "Dream", "Serenade", "Blood", "Cradle", "Marble", "Spindle",
+            "Magma", "Inferno", "Spiral", "Nexus", "Mirror", "Beacon", "Chain", "Cipher", "Glyph", "Conduit",
+            "Altar", "Shrine", "Furnace", "Crucible", "Hive", "Barricade", "Shard", "Facet", "Pulse", "Realm",
+            "Crown", "Enigma", "Clock", "Mechanism", "Thorn", "Torrent", "Abyss", "Conflux", "Idol", "Pantheon",
+            "Coral", "Wave", "Prism", "Spectral", "Cinder", "Hollow", "Labyrinth", "Requiem", "Hive", "Sanctuary",
+            "Spore", "Gossamer", "Lantern", "Nostalgia", "Maze", "Cascades", "Masks", "Fragment", "Pit", "Abyss",
+            "Rift", "Portal", "Forge", "Chasm", "Grave", "Monument", "Scar", "Overseer", "Wrath", "Twilight",
+            "Throne", "Expanse", "Tower", "Pinnacle", "Warden", "Overseer", "Specter", "Haunt", "Whisper", "Murk",
+            "Watcher", "Observer", "Bloom", "Radiance", "Star", "Astral", "Stone", "Monolith", "Feather", "Plume",
+            "Scale", "Tally", "Silver", "Platinum", "Bronze", "Copper", "Gate", "Passage", "Chalice", "Goblet",
+            "Circuit", "Arc", "Ember", "Spark", "Obsidian", "Slag", "Thorn", "Briar", "Echo", "Resonance",
+            "Silk", "Thread", "Wrath", "Fury", "Silence", "Stillness", "Hunger", "Thirst", "Balance", "Harmony",
+            "Wound", "Lesion", "Beacon", "Signal", "Cage", "Prison", "Fortress", "Citadel", "Oracle", "Vision",
+            "Oath", "Vow", "Gloom", "Twilight", "Shell", "Carapace", "Serpent", "Coil", "Spiral", "Whirlpool",
+            "Relic", "Artifact", "Current", "Surge", "Sanctum", "Refuge", "Song", "Hymn", "Blade", "Fang"
+        ];
+
+        const obstaclesFlat = [
+            "Dripping Blood Veil", "Cracking Lava Path", "Drifting Ash Cloud", "Dimming Magic Lantern", "Cracked Bridge", "Locked Iron Gate",
+            "Frozen Chain Walkway", "Hidden Spike Pit", "Glowing Rune Puzzle", "Mist-Filled Chamber", "Echoing Crystal Path", "Fungal Spores",
+            "Engraved Rune Floor", "Crumbling Rune Mark", "Collapsed Vault Door", "Cracking Frost Hallway", "Endless Stairs", "Treasure Chest",
+            "Flickering Flame Wall", "Shattered Mirror Path", "Flickering Flame Corridor", "Glowing Summoning Circle", "Shifting Puzzle Bridge", "Deadly Arcane Blast",
+            "Tangling Silk Nest", "Ancient Symbol Floor", "Shifting Sand Pit", "Howling Ghost Spirits", "Rusted Iron Gate", "Illusory Riddle Tablet",
+            "Veiled Spirit Crossing", "Rolling Boulder Trap", "Winding Thorn Passage", "Sprawling Thorn Tunnel", "Ancient Stone Mechanism", "Water-filled Maze",
+            "Spinning Blade Trap", "Fireburst Rune Puzzle", "Brittle Ice Shards", "Buzzing Swarm Horde", "Webbed Tunnel Crossing", "Cage of Light Shards",
+            "Crumbling Marble Staircase", "Cracked Ice Pathway", "Sinking Bone Pathway", "Twisted Iron Gate", "Chained Spirit Guardian", "Collapsing Rune Stairs",
+            "Luminous Glyph Circle", "Ticking Countdown Mechanism", "Crumbling Ice Shelf", "Molten Shard Crossing", "Splintering Bone Pile", "Cavern of Whispers",
+            "Veiled Specter Ring", "Spinning Blade Puzzle", "Levitating Stone Slabs", "Arcane Turret Barrage", "Screaming Shadow Rift", "Staggering Maze Doors",
+            "Leaking Poison Vents", "Black Void Portal", "Frozen Waterfall Cave", "Blood-filled Altar Pool", "Rising Lava Spout", "Toxic Fog Corridor",
+            "Frozen Glass Path", "Blinding Glyph Ceiling", "Luminous Crystal Trap", "Moss-covered Planks", "Shattered Portal Archway", "Flickering Lantern Hall",
+            "Brittle Crystal Stairs", "Binding Chain Trap", "Pulverizing Stone Press", "Echoing Abyss Pit", "Living Shadow Maze", "Silent Wisp Corridor",
+            "Glistening Spider Webs", "Illusory Bridge Gap", "Howling Wind Archway", "Coiling Serpent Trap", "Frosted Rune Cluster", "Singing Crystal Door",
+            "Trembling Floor Puzzle", "Wailing Spirit Cage", "Creaking Wood Bridge", "Glistening Web Strand", "Twisting Stone Pillars", "Binding Silver Chains",
+            "Dripping Acid Ceiling", "Locked Iron Gate", "Humming Energy Sphere", "Hidden Spike Pit", "Binding Chain Gate", "Fading Glyph Marks",
+            "Molten Stone Corridor", "Fungal Spores", "Echoing Stone Chamber", "Cascading Water Veil", "Screeching Spirit Altar", "Glowing Wisp Conduit",
+            "Crashing Wave Corridor", "Treasure Chest", "Shattered Obsidian Path", "Sealing Glyph Circle", "Shimmering Fog Wall", "Glowing Summoning Circle",
+            "Fractured Crystal Maze", "Deadly Arcane Blast", "Wisp-Guarded Passage", "Mirror Gate Puzzle", "Sealing Rune Door", "Howling Ghost Spirits",
+            "Crumbling Stone Bridge", "Illusory Riddle Tablet", "Ruptured Earth Cavern", "Rolling Boulder Trap", "Pulsing Magic Field", "Gasping Spirit Corridor",
+            "Rumbling Stone Passage", "Water-filled Maze", "Shattered Glass Path", "Spiderling Web Tunnel", "Glinting Silver Trap", "Buzzing Swarm Horde",
+            "Frozen Waterfall Bridge", "Rising Stone Platform", "Shimmering Waterfall Veil", "Cracked Ice Pathway", "Wailing Phantom Wall", "Encroaching Fog Maze",
+            "Shadowed Maze Corridor", "Staring Gargoyle Gate", "Blazing Ember Archway", "Folding Floor and Walls", "Shivering Ice Passage", "Thunderstorm Glyph Puzzle",
+            "Rusting Chain Links", "Shattered Portal Mirror", "Woven Thorn Labyrinth", "Spinning Blade Puzzle", "Chained Spirit Guard", "Arcane Turret Barrage",
+            "Overgrown Thorn Wall", "Void-Touched Archway", "Shifting Rune Gateway", "Black Void Portal", "Hissing Steam Vents", "Blood-filled Altar Pool",
+            "Rotating Glyph Tower", "Toxic Fog Corridor", "Rumbling Stone Echoes", "Sinking Abyss Trap", "Spiraling Light Column", "Moss-covered Planks",
+            "Warding Rune Circle", "Sizzling Ember Path", "Thundering Rockfall", "Shimmering Fog Puzzle", "Leaping Flame Gap", "Draining Spirit Altar",
+            "Glowing Root Snarl", "Roaring Lava Fountain", "Portal to Abyss", "Illusory Bridge Gap", "Bubbling Tar Pit", "Hall of Sinking Chains",
+            "Humming Magic Sphere", "Golden Flame Corridor", "Echoing Cavern Floor", "Crumbling Bridge Trap", "Humming Crystal Archway", "Shimmering Frost Bridge",
+            "Blazing Thorn Passage", "Encroaching Shadow Corridor", "Ethereal Light Pedestal", "Radiant Wisp Archway", "Shifting Sand Maze", "Maddening Glyph Puzzle",
+            "Frozen Rune Altar", "Screaming Spirit Rift", "Collapsing Stalagmite Forest", "Frozen Obsidian Gateway", "Burning Metal Bridge", "Falling Spire Trap",
+            "Pulsing Light Pillar", "Glowing Crystal Floor", "Drifting Ember Clouds", "Wailing Fog Chamber", "Echoing Marble Tunnel", "Reflective Mirror Pathway",
+            "Golden Flame Corridor", "Coiling Snake Arch", "Arcane Web Crossing", "Shifting Rune Wall", "Crumbling Ice Cavern", "Burning Ember Fountain",
+            "Flickering Shadow Gateway", "Rotting Bone Passage"
+        ];
+
+        const formsFlat = [
+            "Dragon", "Wolf", "Unicorn", "Tiger", "Griffon", "Lion", "Phoenix", "Bear", "Hydra", "Panther",
+            "Sphinx", "Leopard", "Chimera", "Elephant", "Basilisk", "Rhino", "Pegasus", "Hippo", "Kraken", "Giraffe",
+            "Leviathan", "Zebra", "Cyclops", "Crocodile", "Gargoyle", "Alligator", "Hippogriff", "Python", "Manticore", "Cobra",
+            "Harpy", "Eagle", "Minotaur", "Hawk", "Gorgon", "Falcon", "Wyvern", "Owl", "Wendigo", "Raven",
+            "Djinn", "Crow", "Ifrit", "Parrot", "Salamander", "Pigeon", "Rakshasa", "Sparrow", "Yeti", "Dolphin",
+            "Zombie", "Whale", "Vampire", "Shark", "Lich", "Octopus", "Wraith", "Squid", "Ghoul", "Jellyfish",
+            "Skeleton", "Crab", "Doppelganger", "Lobster", "Owlbear", "Spider", "Troll", "Scorpion", "Ogre", "Ant",
+            "Giant", "Beetle", "Werewolf", "Moth", "Merfolk", "Butterfly", "Naga", "Dragonfly", "Sea Serpent", "Frog",
+            "Dryad", "Toad", "Pixie", "Salamander", "Fairy", "Newt", "Imp", "Lizard", "Demon", "Chameleon",
+            "Angel", "Gecko", "Beholder", "Iguana", "Mind Flayer", "Tortoise", "Elemental", "Turtle", "Slime", "Camel",
+            "Gelatinous Cube", "Horse", "Rust Monster", "Donkey", "Carrion Crawler", "Goat", "Ankheg", "Sheep", "Roc", "Pig",
+            "Bulette", "Deer", "Displacer Beast", "Moose", "Blink Dog", "Elk", "Shambling Mound", "Reindeer", "Treant", "Kangaroo",
+            "Couatl", "Wallaby", "Aboleth", "Koala", "Kobold", "Platypus", "Goblin", "Emu", "Hobgoblin", "Cassowary",
+            "Orc", "Penguin", "Gnoll", "Seagull", "Kenku", "Flamingo", "Aarakocra", "Peacock", "Tabaxi", "Swan",
+            "Triton", "Duck", "Githyanki", "Goose", "Githzerai", "Rat", "Lizardfolk", "Mouse", "Bugbear", "Squirrel",
+            "Flumph", "Rabbit", "Quaggoth", "Hare", "Thri-Kreen", "Fox", "Fomorian", "Coyote", "Banshee", "Jackal",
+            "Specter", "Hyena", "Shadow", "Buffalo", "Phantom", "Bison", "Will-o'-Wisp", "Ox", "Nightmare", "Bat",
+            "Hellhound", "Beaver", "Barghest", "Otter", "Succubus", "Weasel", "Incubus", "Mink", "Cambion", "Ferret",
+            "Pit Fiend", "Skunk", "Balor", "Badger", "Glabrezu", "Wolverine", "Nalfeshnee", "Porcupine", "Marilith", "Armadillo",
+            "Erinyes", "Axolotl", "Yugoloth", "Komodo Dragon", "Modron", "Mandrill", "Slaad", "Capybara", "Ettin", "Tasmanian Devil"
+        ];
+
+        const featuresFlat = [
+            "Fire-breathing", "Coiled Tail", "Ice-coated", "Glittering Hide", "Shadowy", "Oozing Slime", "Luminescent", "Echoing Voice", "Spiked", "Flickering Glow",
+            "Tentacled", "Piercing Gaze", "Winged", "Dust-coated", "Armored", "Crackling Horns", "Ethereal", "Venom Dripping", "Camouflaged", "Glowing Mouth",
+            "Transparent", "Claws of Ice", "Pulsating", "Shimmering Aura", "Covered in Eyes", "Crystal Spikes", "Glowing Runes", "Rust-covered", "Barbed Tail", "Shredded Wings",
+            "Mossy", "Chameleon Skin", "Crystalline", "Mucus-covered", "Metallic", "Barbed Appendages", "Enormous Claws", "Shell Enclosed", "Fanged Maw", "Multiple Jaws",
+            "Venomous", "Parasitic Growths", "Web-weaving", "Fiery Veins", "Regenerating", "Eyes that Weep Blood", "Steam-emitting", "Exposed Bone", "Lightning-charged", "Stitched Flesh",
+            "Bladed Limbs", "Mechanical Parts", "Horned", "Humming Energy", "Bioluminescent", "Shattered Shell", "Symbiotic Growths", "Hollow Voice", "Dripping Acid", "Chittering Sounds",
+            "Blinding Aura", "Ragged Fur", "Cold Mist Surrounding", "Jagged Fins", "Explosive Spikes", "Chain-wrapped", "Shimmering Scales", "Cloudy Aura", "Tusked", "Moss-covered",
+            "Howling", "Iridescent Fur", "Spore-spewing", "Glistening Tentacles", "Feathered", "Erupting Blisters", "Hardened Carapace", "Thundering Steps", "Gliding Membranes", "Serrated Teeth",
+            "Levitating", "Shimmering Mist", "Cyclonic Winds", "Ringing Bell Sound", "Molten Skin", "Inverted Flesh", "Crackling Energy", "Burning Scent", "Vibrating", "Branch-like Limbs",
+            "Plant-like Appendages", "Whip-like Tail", "Toxic Spores", "Living Icicles", "Bristled", "Pulverizing Jaws", "Dust Cloud", "Fractured Shell", "Glittering Feathers", "Absorbing Light",
+            "Shapeshifting", "Snapping Tendrils", "Massive Wingspan", "Flashing Colors", "Chained", "Shivering Aura", "Spiny Ridge", "Jade-like Skin", "Stone-like Skin", "Webbed Limbs",
+            "Liquid Form", "Dripping Wax", "Multiple Heads", "Singing Echo", "Antlered", "Bone-crafted Armor", "Bioengineered", "Sparking Fangs", "Hollow", "Roaring Flames",
+            "Skeletal", "Earth-like Shell", "Living Tattoos", "Slick Skin", "Mirror-like Shell", "Cyclonic Vortex", "Clockwork Components", "Ember-coated", "Rusting Aura", "Owl-like Eyes",
+            "Sticky Residue", "Beetle-like Shell", "Incorporeal", "Jagged Spikes", "Wailing Echo", "Acid-spewing", "Vine-like Limbs", "Golden Glow", "Aura of Decay", "Thick Fur",
+            "Magnetic Pull", "Wisp-like Body", "Living Armor", "Brittle Shell", "Swirling Dust Body", "Torn Wings", "Eyes of Flame", "Vine-like Growths", "Fractal Patterns", "Thorny Limbs",
+            "Runic Patterns", "Chilled Aura", "Molten Veins", "Overgrown Claws", "Freezing Touch", "Hollow Chest", "Coral-like Growths", "Grasping Roots", "Explosive Crystals", "Mossy Beard",
+            "Enchanted Chains", "Metallic Feathers", "Icicle-covered", "Hissing Aura", "Thorn-covered", "Crushing Grip", "Clawed Wings", "Razor-tipped Tail", "Slithering Spines", "Leaking Sap",
+            "Veil of Smoke", "Glowing Cracks", "Quilled", "Shattering Noise", "Brimstone-scented", "Eerie Hum", "Erupting Lava", "Freezing Wind", "Petrifying Gaze", "Scorched Texture",
+            "Glass-like Texture", "Rusted Chains", "Rotting Flesh", "Pulsing Flesh", "Blinding Light", "Shimmering Dust", "Shredding Beak", "Petrified Limbs", "Ash-covered", "Engraved Shells",
+            "Sticky Webbing", "Emerald Eyes", "Floating Limbs", "Molten Horns", "Living Shadows", "Venomous Fangs", "Golden Horns", "Glowing Spines", "Twisting Vines", "Barbed Whip Tail"
+        ];
+
+        const actionsFlat = [
+            "Pierce", "Engulf", "Bite", "Eject", "Roar", "Expel", "Encircle", "Latch", "Stomp", "Wreathe",
+            "Claw", "Snare", "Shoot", "Puncture", "Throw", "Snatch", "Smash", "Tangle", "Ignite", "Dominate",
+            "Crush", "Emanate", "Freeze", "Repel", "Shock", "Collide", "Slam", "Disperse", "Entangle", "Quench",
+            "Infect", "Flatten", "Poison", "Vanish", "Leech", "Envelop", "Grapple", "Extinguish", "Drag", "Charm",
+            "Explode", "Shield", "Whirlwind", "Disarm", "Chant", "Summon", "Hex", "Dismember", "Enchant", "Spread",
+            "Bewitch", "Engorge", "Confuse", "Invert", "Hypnotize", "Fracture", "Drain", "Overgrow", "Consume", "Wither",
+            "Flare", "Mimic", "Pulse", "Shift", "Shatter", "Detach", "Blast", "Shed", "Pierce", "Harvest",
+            "Impale", "Illuminate", "Sweep", "Constrict", "Kick", "Extend", "Howl", "Bolster", "Spit", "Hibernate",
+            "Lash", "Resurrect", "Summon", "Disperse", "Spawn", "Disintegrate", "Teleport", "Expand", "Phase", "Crackle",
+            "Sink", "Spit", "Erupt", "Gush", "Blaze", "Flood", "Snarl", "Defile", "Overrun", "Dash",
+            "Rip", "Smother", "Tear", "Glow", "Impale", "Wail", "Drown", "Sing", "Swallow", "Cleave",
+            "Spiral", "Plunge", "Throttle", "Swing", "Incinerate", "Wrap", "Strike", "Collapse", "Pounce", "Implode",
+            "Crackle", "Burrow", "Quake", "Emerge", "Roil", "Stagger", "Swoop", "Slice", "Flurry", "Fuse",
+            "Peck", "Embed", "Drill", "Dive", "Scatter", "Entomb", "Dissolve", "Barricade", "Warp", "Flicker",
+            "Slither", "Strike", "Glide", "Unleash", "Sear", "Barricade", "Flash", "Soar", "Blind", "Blast",
+            "Melt", "Shove", "Siphon", "Bounce", "Manifest", "Rebound", "Overwhelm", "Deflect", "Devour", "Ignite",
+            "Push", "Shockwave", "Swing", "Ripple", "Club", "Cascade", "Spear", "Launch", "Dispel", "Grip",
+            "Anchor", "Disrupt", "Spike", "Channel", "Barb", "Augment", "Zap", "Hurl", "Buzz", "Evoke",
+            "Swipe", "Glide", "Screech", "Surge", "Trap", "Hibernate", "Choke", "Lunge", "Weave", "Engulf",
+            "Thrust", "Exhale", "Emit", "Vaporize", "Sing", "Cling", "Coil", "Anchor", "Flame", "Repel"
+        ];
+
+        // State
+        let deck = [];
+        let table = [];
+        let discard = [];
+        let cardPositions = {}; // Store grid positions by card index
+        
+        // Magnetic grid settings
+        const GRID_SIZE_X = 300; // Horizontal snap distance
+        const GRID_SIZE_Y = 180; // Vertical snap distance (reduced to match card height)
+
+        // Initialize
+        function initDeck() {
+            deck = [];
+            
+            // Add all cards
+            descriptors.forEach(d => deck.push({ category: 'descriptor', value: d }));
+            locations.forEach(l => deck.push({ category: 'location', value: l }));
+            themesFlat.forEach(t => deck.push({ category: 'theme', value: t }));
+            obstaclesFlat.forEach(o => deck.push({ category: 'obstacle', value: o }));
+            formsFlat.forEach(f => deck.push({ category: 'form', value: f }));
+            featuresFlat.forEach(f => deck.push({ category: 'feature', value: f }));
+            actionsFlat.forEach(a => deck.push({ category: 'action', value: a }));
+            
+            // Shuffle
+            shuffleDeck();
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function drawCard() {
+            if (deck.length === 0) {
+                alert('No cards left in deck!');
+                return;
+            }
+
+            // Get random card from entire deck
+            const randomIndex = Math.floor(Math.random() * deck.length);
+            const drawnCard = deck[randomIndex];
+            
+            // Remove from deck
+            deck.splice(randomIndex, 1);
+            
+            // Add to table
+            table.push(drawnCard);
+            
+            renderTable();
+            updateDeckCount();
+        }
+
+        function drawSpecificCard(category) {
+            // Find cards of this category in the deck
+            const availableCards = deck.filter(card => card.category === category);
+            
+            if (availableCards.length === 0) {
+                alert(`No more ${category} cards in deck!`);
+                return;
+            }
+
+            // Get random card of this type
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const drawnCard = availableCards[randomIndex];
+            
+            // Remove from deck
+            const deckIndex = deck.indexOf(drawnCard);
+            deck.splice(deckIndex, 1);
+            
+            // Add to table
+            table.push(drawnCard);
+            
+            renderTable();
+            updateDeckCount();
+        }
+
+        function removeCard(index) {
+            const card = table[index];
+            
+            // Store the position before removing
+            const removedPosition = cardPositions[index];
+            
+            // Remove from table
+            table.splice(index, 1);
+            discard.push(card);
+            
+            // Update cardPositions - shift indices down for all cards after the removed one
+            const newPositions = {};
+            Object.keys(cardPositions).forEach(key => {
+                const oldIndex = parseInt(key);
+                if (oldIndex < index) {
+                    // Keep same position and index
+                    newPositions[oldIndex] = cardPositions[oldIndex];
+                } else if (oldIndex > index) {
+                    // Shift index down by 1, keep same position
+                    newPositions[oldIndex - 1] = cardPositions[oldIndex];
+                }
+                // Skip the removed card's index
+            });
+            cardPositions = newPositions;
+            
+            redrawAllCards();
+            updateDiscardCount();
+        }
+
+        function clearTable() {
+            if (table.length === 0) return;
+            discard.push(...table);
+            table = [];
+            cardPositions = {}; // Clear all positions when clearing table
+            redrawAllCards();
+            updateDiscardCount();
+        }
+
+        function reshuffleAll() {
+            // Return all cards from table and discard to deck
+            deck.push(...table);
+            deck.push(...discard);
+            table = [];
+            discard = [];
+            
+            // Shuffle the deck
+            shuffleDeck();
+            
+            redrawAllCards();
+            updateDiscardCount();
+            updateDeckCount();
+        }
+
+        function openDiscardPile() {
+            if (discard.length === 0) {
+                alert('Discard pile is empty!');
+                return;
+            }
+            document.getElementById('discardModal').classList.add('active');
+            document.getElementById('discardOverlay').classList.add('active');
+            renderDiscardPile();
+        }
+
+        function closeDiscardPile() {
+            document.getElementById('discardModal').classList.remove('active');
+            document.getElementById('discardOverlay').classList.remove('active');
+        }
+
+        function returnCardFromDiscard(index) {
+            const card = discard[index];
+            discard.splice(index, 1);
+            table.push(card);
+            renderDiscardPile();
+            renderTable();
+            updateDiscardCount();
+        }
+
+        function renderDiscardPile() {
+            const discardCards = document.getElementById('discardCards');
+            
+            if (discard.length === 0) {
+                discardCards.innerHTML = '<div class="discard-empty">No cards in discard pile</div>';
+                return;
+            }
+            
+            discardCards.innerHTML = discard.map((card, index) => `
+                <div class="discard-card" onclick="returnCardFromDiscard(${index})">
+                    <div class="discard-card-category">${card.category.toUpperCase()}</div>
+                    <div class="discard-card-value">${card.value}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateDiscardCount() {
+            const count = discard.length;
+            document.getElementById('discardCount').textContent = count;
+            
+            // Update button disabled state
+            const discardBtn = document.getElementById('discardBtn');
+            if (count === 0) {
+                discardBtn.style.opacity = '0.3';
+                discardBtn.style.cursor = 'not-allowed';
+            } else {
+                discardBtn.style.opacity = '1';
+                discardBtn.style.cursor = 'pointer';
+            }
+        }
+
+        function renderTable() {
+            const tableContent = document.getElementById('tableContent');
+            
+            // Remove empty message if present
+            const emptyMsg = tableContent.querySelector('.table-empty');
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+            
+            // Only render the last card (the newly drawn one)
+            const lastIndex = table.length - 1;
+            const newCard = table[lastIndex];
+            
+            // Get position for new card
+            const pos = cardPositions[lastIndex] || getNextCardPosition();
+            cardPositions[lastIndex] = pos;
+            
+            const cardHTML = `
+                <div class="card ${newCard.category} new-card" data-index="${lastIndex}" style="left: ${pos.x}px; top: ${pos.y}px;">
+                    <div class="card-header">
+                        <div class="card-category">${newCard.category.toUpperCase()}</div>
+                        <button class="card-remove" onclick="removeCard(${lastIndex})">×</button>
+                    </div>
+                    <div class="card-value">${newCard.value}</div>
+                </div>
+            `;
+            
+            tableContent.insertAdjacentHTML('beforeend', cardHTML);
+            
+            // Add drag listeners to the new card
+            const cards = tableContent.querySelectorAll('.card');
+            const newCardElement = cards[cards.length - 1];
+            setupDragListeners(newCardElement);
+            
+            // Remove new-card class after animation
+            setTimeout(() => {
+                newCardElement.classList.remove('new-card');
+            }, 400);
+        }
+
+        function redrawAllCards() {
+            const tableContent = document.getElementById('tableContent');
+            
+            if (table.length === 0) {
+                tableContent.innerHTML = '<div class="table-empty">DRAW CARDS TO BUILD YOUR ADVENTURE</div>';
+                cardPositions = {}; // Clear positions
+                return;
+            }
+            
+            tableContent.innerHTML = table.map((card, index) => {
+                const pos = cardPositions[index] || getNextCardPosition();
+                cardPositions[index] = pos;
+                
+                return `
+                    <div class="card ${card.category}" data-index="${index}" style="left: ${pos.x}px; top: ${pos.y}px;">
+                        <div class="card-header">
+                            <div class="card-category">${card.category.toUpperCase()}</div>
+                            <button class="card-remove" onclick="removeCard(${index})">×</button>
+                        </div>
+                        <div class="card-value">${card.value}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add drag listeners to all cards
+            const cards = tableContent.querySelectorAll('.card');
+            cards.forEach(card => setupDragListeners(card));
+        }
+
+        // Drag and Drop with magnetic grid
+        let draggedElement = null;
+        let draggedIndex = null;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        function setupDragListeners(cardElement) {
+            cardElement.addEventListener('mousedown', handleMouseDown);
+        }
+
+        function handleMouseDown(e) {
+            // Don't drag if clicking the remove button
+            if (e.target.classList.contains('card-remove')) {
+                return;
+            }
+
+            draggedElement = this;
+            draggedIndex = parseInt(this.dataset.index);
+            const rect = draggedElement.getBoundingClientRect();
+            const parentRect = draggedElement.parentElement.getBoundingClientRect();
+            
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            draggedElement.classList.add('dragging');
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            e.preventDefault();
+        }
+
+        function handleMouseMove(e) {
+            if (!draggedElement) return;
+            
+            const parentRect = document.getElementById('tableContent').getBoundingClientRect();
+            
+            let newX = e.clientX - parentRect.left - offsetX;
+            let newY = e.clientY - parentRect.top - offsetY;
+            
+            // Keep card within bounds
+            newX = Math.max(0, Math.min(newX, parentRect.width - draggedElement.offsetWidth));
+            newY = Math.max(0, Math.min(newY, parentRect.height - draggedElement.offsetHeight));
+            
+            draggedElement.style.left = newX + 'px';
+            draggedElement.style.top = newY + 'px';
+        }
+
+        function handleMouseUp(e) {
+            if (draggedElement) {
+                // Snap to grid
+                const currentX = parseInt(draggedElement.style.left);
+                const currentY = parseInt(draggedElement.style.top);
+                
+                let snappedX = Math.round(currentX / GRID_SIZE_X) * GRID_SIZE_X;
+                let snappedY = Math.round(currentY / GRID_SIZE_Y) * GRID_SIZE_Y;
+                
+                // Check if position is occupied by another card
+                let isOccupied = Object.entries(cardPositions).some(([index, pos]) => {
+                    return parseInt(index) !== draggedIndex && pos.x === snappedX && pos.y === snappedY;
+                });
+                
+                // If occupied, find nearest free spot
+                if (isOccupied) {
+                    const freePos = findNearestFreePosition(snappedX, snappedY);
+                    snappedX = freePos.x;
+                    snappedY = freePos.y;
+                }
+                
+                draggedElement.style.left = snappedX + 'px';
+                draggedElement.style.top = snappedY + 'px';
+                
+                // Store snapped position
+                cardPositions[draggedIndex] = { x: snappedX, y: snappedY };
+                
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+            }
+            
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+
+        function findNearestFreePosition(targetX, targetY) {
+            // Search in expanding circles for the nearest free spot
+            const maxSearchRadius = 10;
+            
+            for (let radius = 1; radius <= maxSearchRadius; radius++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        if (Math.abs(dx) === radius || Math.abs(dy) === radius) {
+                            const testX = targetX + (dx * GRID_SIZE_X);
+                            const testY = targetY + (dy * GRID_SIZE_Y);
+                            
+                            // Check if this position is free and within bounds
+                            if (testX >= 0 && testY >= 0) {
+                                const isOccupied = Object.entries(cardPositions).some(([index, pos]) => {
+                                    return parseInt(index) !== draggedIndex && pos.x === testX && pos.y === testY;
+                                });
+                                
+                                if (!isOccupied) {
+                                    return { x: testX, y: testY };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fallback to original position if no free spot found
+            return { x: targetX, y: targetY };
+        }
+
+        function getNextCardPosition() {
+            // Find next available grid spot
+            const usedPositions = new Set(
+                Object.values(cardPositions).map(pos => `${pos.x},${pos.y}`)
+            );
+            
+            let x = 0;
+            let y = 0;
+            
+            while (usedPositions.has(`${x},${y}`)) {
+                x += GRID_SIZE_X;
+                // Wrap to next row if we exceed reasonable width
+                if (x > GRID_SIZE_X * 3) {
+                    x = 0;
+                    y += GRID_SIZE_Y;
+                }
+            }
+            
+            return { x, y };
+        }
+
+        function updateDeckCount() {
+            // No longer displaying count
+        }
+
+        function toggleTypeSelector() {
+            const selector = document.getElementById('typeSelector');
+            const btn = document.getElementById('filterToggleBtn');
+            selector.classList.toggle('open');
+            btn.classList.toggle('active');
+        }
+
+        function rollAdventure() {
+            const randomAdventure = adventures[Math.floor(Math.random() * adventures.length)];
+            document.getElementById('adventureText').textContent = randomAdventure;
+        }
+
+        // Initialize on load
+        initDeck();
+        rollAdventure(); // Set initial random adventure
+        updateDiscardCount(); // Set initial discard count
+        updateDeckCount(); // Set initial deck count
+    </script>
+</body>
+</html>
